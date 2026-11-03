@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171613">
+  <meta name="description" content="Mario Duxdury: covers en vivo y soluciones de programación hechas para resolver problemas reales.">
+  <title>Mario Duxdury | Música y código</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #171613;
+      --paper: #f2efe8;
+      --orange: #ee633f;
+      --lime: #d7ed72;
+      --blue: #a9c5e8;
+      --muted: #716f68;
+      --mono: "DM Mono", monospace;
+      --sans: "DM Sans", sans-serif;
+      --serif: "Playfair Display", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }
+
+    .topbar {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      padding: 27px 5.5%;
+      color: #fff;
+    }
+    .wordmark, .topnav a, .eyebrow, .section-index, .hero-note, .service-label, .footer-note {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+    .wordmark { text-decoration: none; }
+    .wordmark span { color: var(--orange); }
+    .topnav { display: flex; gap: 34px; }
+    .topnav a { text-decoration: none; transition: color 180ms ease; }
+    .topnav a:hover { color: var(--lime); }
+
+    .hero {
+      position: relative;
+      display: flex;
+      min-height: 710px;
+      height: 91svh;
+      max-height: 980px;
+      align-items: center;
+      overflow: hidden;
+      background: #24211d url("https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=2200&q=85") center 42% / cover no-repeat;
+      color: #fff;
+    }
+    .hero::before {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(17, 16, 14, .92) 0%, rgba(17, 16, 14, .71) 39%, rgba(17, 16, 14, .08) 100%), linear-gradient(0deg, rgba(17, 16, 14, .5), transparent 34%);
+      content: "";
+    }
+    .hero-content {
+      position: relative;
+      width: min(1120px, 89%);
+      margin: 47px auto 0;
+      animation: arrive 800ms ease-out both;
+    }
+    .eyebrow { display: flex; align-items: center; gap: 12px; color: var(--lime); }
+    .eyebrow::before { width: 28px; height: 1px; background: currentColor; content: ""; }
+    h1 {
+      max-width: 760px;
+      margin: 23px 0 22px;
+      font-family: var(--serif);
+      font-size: 112px;
+      font-weight: 600;
+      line-height: .91;
+    }
+    h1 span { display: block; color: var(--orange); font-style: italic; }
+    .hero-copy { max-width: 380px; margin: 0; color: rgba(255,255,255,.77); font-size: 16px; line-height: 1.7; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .action {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 18px;
+      border: 1px solid rgba(255,255,255,.6);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+    .action:hover { border-color: var(--lime); background: var(--lime); color: var(--ink); }
+    .action--bright { border-color: var(--orange); background: var(--orange); color: var(--ink); }
+    .action--bright:hover { border-color: var(--lime); background: var(--lime); }
+    .hero-note { position: absolute; right: 5.5%; bottom: 31px; color: rgba(255,255,255,.76); }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8%;
+      align-items: end;
+      padding: 86px 10% 92px;
+    }
+    .section-index { color: var(--muted); }
+    .intro h2, .section-copy h2 {
+      margin: 16px 0 0;
+      font-family: var(--serif);
+      font-size: 52px;
+      font-weight: 600;
+      line-height: 1.06;
+    }
+    .intro h2 em { color: var(--orange); font-weight: 600; }
+    .intro p { max-width: 440px; margin: 0 0 4px; color: #58564f; font-size: 15px; line-height: 1.85; }
+
+    .feature {
+      display: grid;
+      min-height: 570px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .feature--music { background: #e7d2c4; }
+    .feature--code { background: #dce5eb; }
+    .feature-image { position: relative; min-height: 470px; overflow: hidden; }
+    .feature-image img { position: absolute; width: 100%; height: 100%; object-fit: cover; transition: transform 650ms cubic-bezier(.2,.7,.2,1); }
+    .feature:hover .feature-image img { transform: scale(1.035); }
+    .feature--music .feature-image img { object-position: center 42%; }
+    .feature--code .feature-image img { object-position: center; }
+    .feature-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 72px clamp(36px, 8vw, 120px); }
+    .feature-copy .section-index { display: flex; align-items: center; gap: 11px; }
+    .feature-copy .section-index::before { width: 22px; height: 1px; background: currentColor; content: ""; }
+    .feature-copy h2 { font-size: 60px; }
+    .feature-copy h2 em { font-weight: 600; }
+    .feature--music h2 em { color: #a6432d; }
+    .feature--code h2 em { color: #2e6687; }
+    .feature-copy > p { max-width: 390px; margin: 19px 0 23px; color: #4f4b46; font-size: 15px; line-height: 1.8; }
+    .service-label { margin: 4px 0 10px; color: var(--muted); }
+    .repertoire-heading { margin-top: 22px; }
+    .repertoire { margin: 22px 0 0; padding-left: 20px; color: #4f4b46; font-size: 14px; line-height: 1.7; }
+    .repertoire a { color: #7d3828; text-underline-offset: 3px; }
+    .repertoire a:hover { color: var(--ink); }
+    .services { display: flex; flex-wrap: wrap; gap: 8px; max-width: 420px; margin: 0 0 28px; padding: 0; list-style: none; }
+    .services li { padding: 8px 10px; border: 1px solid rgba(23,22,19,.23); font-size: 12px; }
+    .web-offer { max-width: 420px; margin: -5px 0 25px; padding: 2px 0 2px 15px; border-left: 3px solid #2e6687; }
+    .web-offer p { margin: 0; color: #3f4548; font-size: 13px; line-height: 1.7; }
+    .web-offer p + p { margin-top: 7px; }
+    .web-offer strong { color: #214f69; }
+    .feature-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+    .feature-link { display: inline-flex; min-height: 45px; align-items: center; gap: 13px; padding: 0 15px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 180ms ease; }
+    .feature-link:hover { background: #a6432d; }
+    .feature--code .feature-link:hover { background: #2e6687; }
+    .link-arrow { font-size: 18px; line-height: 1; }
+    .qr-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 150px;
+      padding: 10px 10px 8px;
+      border: 1px solid rgba(23,22,19,.24);
+      background: rgba(255,255,255,.26);
+      backdrop-filter: blur(2px);
+    }
+    .qr-card img {
+      display: block;
+      width: 132px;
+      height: 132px;
+      object-fit: cover;
+      border: 1px solid rgba(23,22,19,.2);
+      background: #fff;
+    }
+    .qr-card figcaption {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .link-arrow { font-size: 18px; line-height: 1; }
+
+    .closing {
+      display: flex;
+      min-height: 330px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 70px 8%;
+      background: var(--ink);
+      color: var(--paper);
+      text-align: center;
+    }
+    .closing .eyebrow { color: var(--lime); }
+    .closing h2 { max-width: 700px; margin: 20px 0 25px; font-family: var(--serif); font-size: 50px; font-weight: 600; line-height: 1.08; }
+    .closing h2 em { color: var(--orange); }
+    .contact-emails { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; margin: 0 0 24px; }
+    .contact-emails a { color: rgba(255,255,255,.82); font-size: 14px; overflow-wrap: anywhere; text-decoration-color: var(--orange); text-underline-offset: 4px; }
+    .contact-emails a:hover { color: var(--lime); }
+    .closing .action { border-color: var(--lime); background: var(--lime); color: var(--ink); }
+    .closing .action:hover { border-color: var(--orange); background: var(--orange); }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px 5.5%; background: var(--ink); color: rgba(255,255,255,.6); }
+    footer a { color: #fff; text-decoration: none; }
+    footer a:hover { color: var(--lime); }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) {
+      .topbar { padding: 22px 6%; }
+      .topnav { gap: 17px; }
+      .topnav a { font-size: 10px; }
+      .hero { min-height: 680px; height: 88svh; max-height: 820px; background-position: 58% center; }
+      .hero::before { background: linear-gradient(90deg, rgba(17,16,14,.86), rgba(17,16,14,.27)), linear-gradient(0deg, rgba(17,16,14,.66), transparent 62%); }
+      .hero-content { width: 88%; margin-top: 30px; }
+      h1 { font-size: 76px; }
+      .hero-copy { max-width: 330px; font-size: 15px; }
+      .hero-note { right: 6%; bottom: 21px; font-size: 9px; }
+      .intro { grid-template-columns: 1fr; gap: 22px; padding: 61px 8% 67px; }
+      .intro h2 { max-width: 500px; font-size: 43px; }
+      .feature { grid-template-columns: 1fr; }
+      .feature-image { min-height: 380px; }
+      .feature--code .feature-image { order: 0; }
+      .feature--code .feature-copy { order: 1; }
+      .feature-copy { padding: 48px 8% 56px; }
+      .feature-copy h2 { font-size: 52px; }
+      .closing { min-height: 290px; }
+      .closing h2 { font-size: 42px; }
+      .contact-emails { flex-direction: column; gap: 12px; }
+      footer { padding: 19px 6%; }
+    }
+    @media (max-width: 390px) {
+      .topnav { gap: 12px; }
+      .topnav a { font-size: 9px; }
+      h1 { font-size: 64px; }
+      .hero-actions { align-items: flex-start; flex-direction: column; }
+      .intro h2 { font-size: 38px; }
+      .feature-copy h2 { font-size: 46px; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="#inicio" aria-label="Mario Duxdury, inicio">MARIO <span>DUXDURY</span></a>
+    <nav class="topnav" aria-label="Navegación principal">
+      <a href="#musica">Música</a>
+      <a href="#codigo">Código</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <div class="eyebrow">Dos facetas. Una misma pasión.</div>
+        <h1 id="hero-title">Mario <span>Duxdury</span></h1>
+        <p class="hero-copy">Canciones que hago mías. Ideas que convierto en soluciones. Bienvenido a mis dos mundos.</p>
+        <div class="hero-actions">
+          <a class="action action--bright" href="#musica">Descubrir mi música</a>
+          <a class="action" href="#codigo">Ver qué puedo resolver</a>
+        </div>
+      </div>
+      <div class="hero-note">Música en vivo · Código con propósito</div>
+    </section>
+
+    <section class="intro" aria-labelledby="intro-title">
+      <div>
+        <div class="section-index">Una presentación</div>
+        <h2 id="intro-title">Dos maneras de decir <em>“esto es lo mío”.</em></h2>
+      </div>
+      <p>Cuando no estoy buscando el tono de una canción, estoy buscando la manera de resolver algo con código. Aquí puedes conocer cada faceta y encontrar la que te trajo.</p>
+    </section>
+
+    <section class="feature feature--music" id="musica" aria-labelledby="music-title">
+      <div class="feature-image">
+        <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=1400&q=85" alt="Artista cantando frente a un micrófono en un escenario" loading="lazy">
+      </div>
+      <div class="feature-copy">
+        <div class="section-index">01 / Música</div>
+        <h2 id="music-title">Canciones<br>con otra <em>voz.</em></h2>
+        <p>Comparto covers de canciones que me gustan, a mi manera. Si disfrutas la música y quieres acompañarme en el camino, nos vemos por aquí.</p>
+        <div class="feature-meta">
+          <a class="feature-link" href="https://www.facebook.com/share/1DzMHCNxd4/" target="_blank" rel="noopener noreferrer">
+            Seguir a Mario Duxdury <span class="link-arrow" aria-hidden="true">↗</span>
+          </a>
+          <figure class="qr-card" aria-label="Código QR para la música de Mario Duxdury">
+            <img src="images/1793229125595.png" alt="Código QR de Mario Duxdury">
+            <figcaption>QR música</figcaption>
+          </figure>
+        </div>
+        <div class="service-label repertoire-heading">Repertorio</div>
+        <ol class="repertoire">
+          <li><a href="https://www.facebook.com/share/v/19Vu3R44nJ/" target="_blank" rel="noopener noreferrer">Ver reel en Facebook</a></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="feature feature--code" id="codigo" aria-labelledby="code-title">
+      <div class="feature-copy">
+        <div class="section-index">02 / Programación</div>
+        <h2 id="code-title">Tu problema.<br>Una solución <em>real.</em></h2>
+        <p>En Dx Codex By Dux convierto necesidades en soluciones prácticas. Hablemos de ese proceso manual, error o idea que te gustaría poner en marcha.</p>
+        <div class="service-label">Puedo ayudarte con</div>
+        <ul class="services" aria-label="Servicios de programación">
+          <li>Páginas web</li>
+          <li>Automatizaciones</li>
+          <li>Corrección de errores</li>
+          <li>Herramientas a medida</li>
+        </ul>
+        <div class="web-offer">
+          <p>Haz realidad tu idea: <strong>$100 MXN por página, con dominio incluido.</strong></p>
+          <p>¿Quieres mantener tu sitio al día? El mantenimiento es opcional: <strong>$300 MXN por modificación.</strong> Para cambios frecuentes, cotizamos según la frecuencia que necesites.</p>
+        </div>
+        <div class="feature-meta">
+          <a class="feature-link" href="https://www.facebook.com/share/1EwVcoVdiJ/" target="_blank" rel="noopener noreferrer">
+            Cotiza tu página <span class="link-arrow" aria-hidden="true">↗</span>
+          </a>
+          <figure class="qr-card" aria-label="Código QR para Dx Codex By Dux">
+            <img src="images/1793228777104.png" alt="Código QR de Dx Codex By Dux">
+            <figcaption>QR código</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="feature-image">
+        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=85" alt="Espacio de trabajo con computadora para desarrollar software" loading="lazy">
+      </div>
+    </section>
+
+    <section class="closing" aria-labelledby="closing-title">
+      <div class="eyebrow">¿Por dónde empezamos?</div>
+      <h2 id="closing-title">Una canción para escuchar.<br><em>Una idea para construir.</em></h2>
+      <div class="contact-emails" aria-label="Correos de contacto">
+        <a href="mailto:dux.capy.93@gmail.com">dux.capy.93@gmail.com</a>
+        <a href="mailto:mario_mario93@hotmail.com">mario_mario93@hotmail.com</a>
+      </div>
+      <a class="action" href="https://wa.me/528343015304" target="_blank" rel="noopener noreferrer">Escríbeme por WhatsApp: +52 834 301 5304 <span class="link-arrow" aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-note">© <span id="year">2026</span> Mario Duxdury</div>
+    <div class="footer-note"><a href="https://www.facebook.com/share/1DzMHCNxd4/" target="_blank" rel="noopener noreferrer">Música</a> &nbsp;·&nbsp; <a href="https://www.facebook.com/share/1EwVcoVdiJ/" target="_blank" rel="noopener noreferrer">Dx Codex By Dux</a></div>
+  </footer>
+</body>
+</html>
