@@ -153,12 +153,13 @@
     .feature--code h2 em { color: #2e6687; }
     .feature-copy > p { max-width: 390px; margin: 19px 0 23px; color: #4f4b46; font-size: 15px; line-height: 1.8; }
     .service-label { margin: 4px 0 10px; color: var(--muted); }
-    .repertoire-heading { margin-top: 22px; }
-    .repertoire { margin: 22px 0 0; padding-left: 20px; color: #4f4b46; font-size: 14px; line-height: 1.7; }
-    .repertoire a { color: #7d3828; text-underline-offset: 3px; }
-    .repertoire a:hover { color: var(--ink); }
-    .reel-embed { width: min(100%, 360px); margin: 14px 0 0; }
-    .reel-embed iframe { display: block; width: 100%; aspect-ratio: 9 / 16; border: 0; background: #171613; }
+    .reels { padding: 68px 8% 78px; background: #e7d2c4; }
+    .reels-header { max-width: 1120px; margin: 0 auto 28px; }
+    .reels-header h2 { margin: 14px 0 0; font-family: var(--serif); font-size: 46px; font-weight: 600; line-height: 1.08; }
+    .reels-header h2 em { color: #a6432d; }
+    .reel-grid { display: grid; max-width: 1120px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0 auto; }
+    .reel-embed { min-width: 0; margin: 0; }
+    .reel-embed iframe { display: block; width: 100%; aspect-ratio: 1 / 1; border: 0; background: #171613; }
     .reel-embed figcaption { margin-top: 8px; color: #4f4b46; font-size: 12px; line-height: 1.6; }
     .reel-embed a { color: #7d3828; text-underline-offset: 3px; }
     .reel-embed a:hover { color: var(--ink); }
@@ -212,11 +213,14 @@
       .intro { grid-template-columns: 1fr; gap: 22px; padding: 61px 8% 67px; }
       .intro h2 { max-width: 500px; font-size: 43px; }
       .feature { grid-template-columns: 1fr; }
+      .reel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
       .feature-image { min-height: 380px; }
       .feature--code .feature-image { order: 0; }
       .feature--code .feature-copy { order: 1; }
       .feature-copy { padding: 48px 8% 56px; }
       .feature-copy h2 { font-size: 52px; }
+      .reels { padding: 54px 8% 62px; }
+      .reels-header h2 { font-size: 40px; }
       .closing { min-height: 290px; }
       .closing h2 { font-size: 42px; }
       .contact-emails { flex-direction: column; gap: 12px; }
@@ -229,6 +233,9 @@
       .hero-actions { align-items: flex-start; flex-direction: column; }
       .intro h2 { font-size: 38px; }
       .feature-copy h2 { font-size: 46px; }
+      .reel-grid { grid-template-columns: 1fr; }
+      .reel-embed { width: min(100%, 420px); margin: 0 auto; }
+      .reels-header h2 { font-size: 36px; }
       footer { flex-direction: column; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -280,10 +287,18 @@
             Seguir a Mario Duxdury <span class="link-arrow" aria-hidden="true">↗</span>
           </a>
         </div>
-        <div class="service-label repertoire-heading">Reel destacado</div>
+      </div>
+    </section>
+
+    <section class="reels" aria-labelledby="reels-title">
+      <div class="reels-header">
+        <div class="section-index">Reels</div>
+        <h2 id="reels-title">Un poco de música <em>en vivo.</em></h2>
+      </div>
+      <div class="reel-grid" aria-label="Reels de Mario Duxdury">
         <figure class="reel-embed">
           <iframe
-            src="https://www.facebook.com/plugins/video.php?height=640&amp;href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1105706432463571%2F&amp;show_text=false&amp;width=360"
+            src="https://www.facebook.com/plugins/video.php?height=360&amp;href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1105706432463571%2F&amp;show_text=false&amp;width=360"
             title="Reel de Mario Duxdury en Facebook"
             loading="lazy"
             allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
