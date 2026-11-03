@@ -190,6 +190,10 @@
     .project-card .project-note { min-height: 0; margin: 12px 0 0; font-size: 12px; }
     .project-demo { margin-top: 16px; }
     .project-demo iframe { display: block; width: 100%; aspect-ratio: 16 / 10; border: 0; background: #fff; }
+    .project-card--placeholder { display: grid; min-height: 220px; align-content: center; justify-items: center; border-style: dashed; background: rgba(255,255,255,.28); text-align: center; }
+    .project-card--placeholder .project-tag { border: 1px solid rgba(23,22,19,.23); background: transparent; color: var(--ink); }
+    .project-card--placeholder h3 { margin-bottom: 8px; }
+    .project-card--placeholder > p { min-height: 0; max-width: 230px; margin: 0; }
     .project-link { display: inline-flex; min-height: 42px; align-items: center; gap: 10px; margin-top: 14px; padding: 0 13px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; text-decoration: none; }
     .project-link:hover { background: #2e6687; }
 
@@ -362,38 +366,29 @@
       <div class="projects-header">
         <div class="section-index">Muestras de programación</div>
         <h2 id="projects-title">Proyectos que resuelven <em>algo real.</em></h2>
-        <p>Esta sección está lista para mostrar demos interactivas. Cuando publiques una, reemplaza la tarjeta de ejemplo con su nombre, descripción y enlace.</p>
+        <p>Explora proyectos interactivos directamente desde esta página o ábrelos para verlos a pantalla completa.</p>
       </div>
       <div class="project-grid">
         <article class="project-card">
-          <span class="project-tag">Plantilla de proyecto</span>
-          <h3>Tu próxima demo</h3>
-          <p>Describe aquí qué hace el proyecto y qué problema ayuda a resolver.</p>
-          <div class="project-preview" aria-label="Espacio reservado para la vista previa de la demo">
-            <div>
-              <strong>Vista previa</strong>
-              <span>Al agregar la dirección pública de tu demo, podrá mostrarse aquí.</span>
-            </div>
+          <span class="project-tag">Sistema interactivo</span>
+          <h3>DxParking</h3>
+          <p>Controla entradas, salidas, pagos y cortes de caja de un estacionamiento.</p>
+          <div class="project-demo">
+            <iframe src="demos/DxParking/DxParking.html"
+              title="Demo interactiva de DxParking" loading="lazy"></iframe>
           </div>
-          <p class="project-note">Aún no hay una demo enlazada.</p>
+          <p class="project-note">Demo de muestra: los datos se guardan solo en este navegador.</p>
+          <a class="project-link" href="demos/DxParking/DxParking.html"
+            target="_blank" rel="noopener noreferrer">
+            Abrir demo completa <span class="link-arrow" aria-hidden="true">↗</span>
+          </a>
+        </article>
+        <article class="project-card project-card--placeholder">
+          <span class="project-tag">Próximamente</span>
+          <h3>Aquí habrá más demos</h3>
+          <p>Estamos preparando nuevos proyectos interactivos para mostrar.</p>
         </article>
       </div>
-      <!-- Para publicar una demo, reemplaza la tarjeta anterior. Duplica este bloque para cada proyecto:
-      <article class="project-card">
-        <span class="project-tag">Sistema interactivo</span>
-        <h3>Nombre del proyecto</h3>
-        <p>Qué hace y qué problema resuelve.</p>
-        <div class="project-demo">
-          <iframe src="https://tu-demo-publicada.example"
-            title="Demo de Nombre del proyecto" loading="lazy"
-            allowfullscreen></iframe>
-        </div>
-        <a class="project-link" href="https://tu-demo-publicada.example"
-          target="_blank" rel="noopener noreferrer">
-          Abrir demo completa <span class="link-arrow" aria-hidden="true">↗</span>
-        </a>
-      </article>
-      -->
     </section>
 
     <section class="closing" aria-labelledby="closing-title">

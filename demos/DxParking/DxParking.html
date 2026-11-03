@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>DxParking | Control de estacionamiento</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17231d;
+      --muted: #6d7871;
+      --line: #e2e8e1;
+      --paper: #ffffff;
+      --canvas: #f6f7f2;
+      --green: #176b4a;
+      --green-dark: #10543a;
+      --green-pale: #e7f2eb;
+      --lime: #d3ef74;
+      --orange: #e78d43;
+      --red: #b94a3b;
+      --shadow: 0 12px 32px rgb(23 35 29 / 6%);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      font-size: 15px;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1280px; margin: 0 auto; padding: 28px 32px 52px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid; width: 42px; height: 42px; place-items: center;
+      border-radius: 12px; background: var(--green); color: white; font-size: 20px;
+    }
+    .brand-name { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0; }
+    .brand-subtitle { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .clock { text-align: right; }
+    .clock time { display: block; font-size: 15px; font-weight: 700; }
+    .clock span { color: var(--muted); font-size: 12px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 0 0 21px; }
+    .intro h1 { margin: 0; font-size: 29px; letter-spacing: 0; }
+    .intro p { margin: 7px 0 0; color: var(--muted); }
+    .period-tag { padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+    .stat { min-height: 108px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+    .stat-label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .stat-icon { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 8px; background: var(--green-pale); color: var(--green); font-size: 14px; }
+    .stat-value { display: block; margin-top: 10px; font-size: 27px; font-weight: 800; }
+    .nav { display: flex; gap: 5px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+    .nav button { padding: 12px 16px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-weight: 700; }
+    .nav button[aria-current="page"] { border-color: var(--green); color: var(--green); }
+    .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 13px; }
+    .section-heading h2 { margin: 0; font-size: 18px; }
+    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .operation-grid { display: grid; grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.6fr); align-items: start; gap: 18px; }
+    .panel { border: 1px solid var(--line); border-radius: 10px; background: var(--paper); box-shadow: var(--shadow); }
+    .form-panel { padding: 20px; }
+    .form-panel h2 { margin: 0 0 17px; font-size: 17px; }
+    .field { display: grid; gap: 7px; margin-bottom: 14px; }
+    .field label { color: #435149; font-size: 12px; font-weight: 700; }
+    .field input, .field select, .search-input, .dialog-field input, .dialog-field select {
+      width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #d6ded7; border-radius: 7px;
+      outline: none; background: white; color: var(--ink);
+    }
+    .field input:focus, .field select:focus, .search-input:focus, .dialog-field input:focus, .dialog-field select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(23 107 74 / 12%); }
+    .field-hint { color: var(--muted); font-size: 11px; }
+    .primary, .secondary, .quiet-button {
+      min-height: 40px; padding: 9px 14px; border: 1px solid transparent; border-radius: 7px; font-weight: 700;
+    }
+    .primary { background: var(--green); color: white; }
+    .primary:hover { background: var(--green-dark); }
+    .primary:disabled { cursor: not-allowed; opacity: .48; }
+    .secondary { border-color: var(--line); background: white; color: var(--ink); }
+    .secondary:hover, .quiet-button:hover { background: #f1f5f0; }
+    .quiet-button { border-color: var(--line); background: var(--paper); color: var(--green); }
+    .danger-button { color: var(--red); }
+    .row-actions { display: flex; align-items: center; gap: 6px; }
+    .full-width { width: 100%; }
+    .table-panel { min-width: 0; overflow: hidden; }
+    .table-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid var(--line); }
+    .table-toolbar h2 { margin: 0; font-size: 16px; }
+    .table-toolbar p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .search-input { width: min(230px, 42vw); min-height: 36px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th { padding: 11px 14px; background: #f7f9f6; color: var(--muted); font-size: 11px; font-weight: 700; }
+    td { padding: 13px 14px; border-top: 1px solid #edf0ec; font-size: 13px; }
+    td strong { font-weight: 700; }
+    .plate { display: inline-block; padding: 4px 7px; border: 1px solid #dfe4df; border-radius: 4px; background: #fafbf9; font-size: 11px; font-weight: 800; letter-spacing: .3px; }
+    .color-dot { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border: 1px solid rgb(0 0 0 / 12%); border-radius: 50%; vertical-align: 0; }
+    .elapsed { color: var(--green); font-weight: 700; }
+    .empty { padding: 38px 20px; color: var(--muted); text-align: center; white-space: normal; }
+    .empty strong { display: block; margin-bottom: 6px; color: var(--ink); }
+    .view[hidden] { display: none; }
+    .toolbar-actions { display: flex; align-items: center; gap: 9px; }
+    .cut-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 16px; }
+    .cut-summary .stat { min-height: 88px; padding: 14px 16px; }
+    .cut-summary .stat-value { margin-top: 8px; font-size: 21px; }
+    .cut-callout { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 17px 19px; margin-bottom: 18px; border: 1px solid #d8e6d9; border-radius: 9px; background: #edf5eb; }
+    .cut-callout strong { display: block; margin-bottom: 4px; }
+    .cut-callout p { margin: 0; color: var(--muted); font-size: 12px; }
+    .method { color: #526158; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 3; max-width: min(390px, calc(100vw - 32px)); padding: 13px 16px; border-radius: 8px; background: var(--ink); color: white; box-shadow: var(--shadow); }
+    .toast[hidden] { display: none; }
+    .storage-error { top: 16px; right: 16px; bottom: auto; background: var(--red); }
+    dialog { width: min(430px, calc(100vw - 28px)); padding: 0; border: 0; border-radius: 11px; box-shadow: 0 24px 80px rgb(0 0 0 / 22%); }
+    dialog::backdrop { background: rgb(16 28 21 / 48%); }
+    .dialog-content { padding: 22px; }
+    .dialog-content h2 { margin: 0 0 5px; font-size: 20px; }
+    .dialog-content > p { margin: 0 0 17px; color: var(--muted); font-size: 13px; }
+    .charge-box { display: flex; justify-content: space-between; align-items: center; padding: 13px; margin: 0 0 15px; border-radius: 8px; background: var(--green-pale); }
+    .charge-box span { color: #476254; font-size: 13px; }
+    .charge-box strong { color: var(--green-dark); font-size: 24px; }
+    .dialog-field { display: grid; gap: 7px; margin-bottom: 14px; }
+    .dialog-field[hidden] { display: none; }
+    .dialog-field label { color: #435149; font-size: 12px; font-weight: 700; }
+    .dialog-actions { display: flex; justify-content: end; gap: 8px; margin-top: 19px; }
+    .rate-note { padding: 12px 14px; margin-top: 17px; border-left: 3px solid var(--lime); background: #f8faef; color: #59645d; font-size: 12px; line-height: 1.6; }
+    .rate-note strong { color: var(--ink); }
+    @media (max-width: 850px) {
+      .operation-grid { grid-template-columns: 1fr; }
+      .cut-summary { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 580px) {
+      .shell { padding: 19px 15px 34px; }
+      .topbar { margin-bottom: 24px; }
+      .intro { align-items: start; flex-direction: column; }
+      .intro h1 { font-size: 25px; }
+      .period-tag { white-space: normal; }
+      .stats { grid-template-columns: 1fr; gap: 9px; margin-bottom: 20px; }
+      .stat { min-height: 83px; padding: 13px 16px; }
+      .stat-value { margin-top: 6px; font-size: 23px; }
+      .nav { overflow-x: auto; }
+      .nav button { padding: 11px 12px; white-space: nowrap; }
+      .form-panel { padding: 16px; }
+      .cut-callout { align-items: start; flex-direction: column; }
+      .table-toolbar { align-items: start; flex-direction: column; }
+      .search-input { width: 100%; }
+      .toolbar-actions { width: 100%; align-items: stretch; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .panel, .stat { animation: arrive .35s ease-out both; }
+      .stat:nth-child(2) { animation-delay: .05s; }
+      .stat:nth-child(3) { animation-delay: .1s; }
+      @keyframes arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">P</div>
+        <div><p class="brand-name">DxParking</p><p class="brand-subtitle">Control de estacionamiento</p></div>
+      </div>
+      <div class="clock"><time id="live-time"></time><span id="live-date"></span></div>
+    </header>
+
+    <section class="intro">
+      <div><h1>Operación del estacionamiento</h1><p>Entradas, salidas y cobros en un solo lugar.</p></div>
+      <div class="period-tag" id="period-label">Periodo de cobro actual</div>
+    </section>
+
+    <section class="stats" aria-label="Resumen">
+      <article class="stat"><div class="stat-label"><span class="stat-icon" aria-hidden="true">↗</span>Vehículos adentro</div><strong class="stat-value" id="active-count">0</strong></article>
+      <article class="stat"><div class="stat-label"><span class="stat-icon" aria-hidden="true">$</span>Cobrado desde el último corte</div><strong class="stat-value" id="open-total">$0</strong></article>
+      <article class="stat"><div class="stat-label"><span class="stat-icon" aria-hidden="true">✓</span>Pagos en el periodo</div><strong class="stat-value" id="open-count">0</strong></article>
+      <article class="stat"><div class="stat-label"><span class="stat-icon" aria-hidden="true">!</span>Adeudos pendientes</div><strong class="stat-value" id="open-debt-total">$0</strong></article>
+    </section>
+
+    <nav class="nav" aria-label="Secciones">
+      <button type="button" data-view="operation" aria-current="page">Operación</button>
+      <button type="button" data-view="payments">Pagos</button>
+      <button type="button" data-view="cuts">Cortes</button>
+    </nav>
+
+    <section class="view" id="view-operation">
+      <div class="operation-grid">
+        <form class="panel form-panel" id="entry-form">
+          <h2>Registrar entrada</h2>
+          <div class="field"><label for="driver">Nombre del conductor *</label><input id="driver" name="driver" maxlength="90" required placeholder="Nombre completo" autocomplete="name"></div>
+          <div class="field"><label for="plate">Placas <span class="field-hint">(opcional)</span></label><input id="plate" name="plate" maxlength="18" placeholder="Ej. ABC-123-D" autocapitalize="characters"></div>
+          <div class="field"><label for="car-color">Color del automóvil *</label><input id="car-color" name="color" maxlength="40" required placeholder="Ej. blanco"></div>
+          <div class="field"><label for="entry-time">Hora de entrada</label><input id="entry-time" name="entryTime" type="datetime-local" step="1" readonly aria-describedby="entry-time-hint"><span class="field-hint" id="entry-time-hint">Se actualiza automáticamente y se registra al confirmar.</span></div>
+          <button class="primary full-width" type="submit">+ Registrar vehículo</button>
+          <div class="rate-note"><strong>Tarifas de estacionamiento</strong><br>Hasta 15 min: $10<br>Más de 15 min y hasta 1 h: $20<br>Más de 1 h y hasta 2 h: $40<br>Más de 2 h: $50 fijo<br>El tiempo que exceda cada límite se cobra como hora o fracción; después de 2 h, el total queda fijo en $50.</div>
+        </form>
+
+        <section class="panel table-panel" aria-labelledby="active-title">
+          <div class="table-toolbar"><div><h2 id="active-title">Vehículos en el estacionamiento</h2><p id="active-caption">0 vehículos registrados</p></div><input class="search-input" id="active-search" type="search" placeholder="Buscar conductor o placas" aria-label="Buscar vehículos"></div>
+          <div class="table-wrap"><table><thead><tr><th>Salida o anulación</th><th>Conductor</th><th>Placas</th><th>Color</th><th>Entrada</th><th>Tiempo</th></tr></thead><tbody id="active-rows"></tbody></table><div class="empty" id="active-empty"><strong>El estacionamiento está vacío</strong>Registra una entrada para comenzar.</div></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="view-payments" hidden>
+      <div class="section-heading"><div><h2>Pagos registrados</h2><p>Pagos efectivamente registrados en este navegador.</p></div><input class="search-input" id="payment-search" type="search" placeholder="Buscar conductor o placas" aria-label="Buscar pagos"></div>
+      <section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Conductor</th><th>Placas</th><th>Entrada</th><th>Salida</th><th>Tiempo</th><th>Pago</th><th>Fecha de cobro</th><th>Método</th><th>Corte</th></tr></thead><tbody id="payment-rows"></tbody></table><div class="empty" id="payment-empty"><strong>Aún no hay pagos</strong>Los cobros de salida aparecerán aquí.</div></div></section>
+      <div class="section-heading" style="margin-top:24px"><div><h2>Adeudos pendientes</h2><p>Salidas registradas sin pago; al cobrar, el importe entra al siguiente corte.</p></div></div>
+      <section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Conductor</th><th>Placas</th><th>Salida</th><th>Tiempo</th><th>Adeudo</th><th></th></tr></thead><tbody id="debt-rows"></tbody></table><div class="empty" id="debt-empty"><strong>No hay adeudos pendientes</strong></div></div></section>
+      <div class="section-heading" style="margin-top:24px"><div><h2>Entradas anuladas</h2><p>Historial de registros cancelados; no afectan los cobros ni el corte.</p></div></div>
+      <section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Conductor</th><th>Placas</th><th>Entrada registrada</th><th>Fecha de anulación</th><th>Motivo</th></tr></thead><tbody id="cancellation-rows"></tbody></table><div class="empty" id="cancellation-empty"><strong>No hay entradas anuladas</strong></div></div></section>
+    </section>
+
+    <section class="view" id="view-cuts" hidden>
+      <div class="cut-callout"><div><strong>Corte de caja</strong><p>El corte se guarda automáticamente a medianoche (hora local) mientras la app está abierta; si se cierra, procesa el cambio al volver a abrir. También puedes hacerlo manualmente. Los vehículos que siguen dentro no se cierran.</p></div><button class="primary" id="make-cut" type="button">↓ Hacer corte y descargar</button></div>
+      <div class="cut-summary">
+        <article class="stat"><div class="stat-label">Total pendiente de corte</div><strong class="stat-value" id="cut-total">$0</strong></article>
+        <article class="stat"><div class="stat-label">Pagos pendientes</div><strong class="stat-value" id="cut-count">0</strong></article>
+        <article class="stat"><div class="stat-label">Efectivo</div><strong class="stat-value" id="cut-cash">$0</strong></article>
+        <article class="stat"><div class="stat-label">Tarjeta y transferencia</div><strong class="stat-value" id="cut-other">$0</strong></article>
+      </div>
+      <div class="section-heading"><div><h2>Cortes anteriores</h2><p>Descarga de nuevo cualquier corte guardado.</p></div></div>
+      <section class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Fecha del corte</th><th>Periodo</th><th>Pagos</th><th>Total</th><th>Desglose</th><th></th></tr></thead><tbody id="cut-rows"></tbody></table><div class="empty" id="cut-empty"><strong>Todavía no hay cortes</strong>El primer corte se crea a medianoche o con el botón de arriba.</div></div></section>
+    </section>
+  </main>
+
+  <dialog id="checkout-dialog" aria-labelledby="checkout-title">
+    <form class="dialog-content" id="checkout-form">
+      <h2 id="checkout-title">Registrar salida</h2>
+      <p id="checkout-driver"></p>
+      <div class="charge-box"><span id="charge-duration">Tiempo estacionado</span><strong id="charge-amount">$30</strong></div>
+      <div class="dialog-field"><label for="exit-time">Hora de salida</label><input id="exit-time" type="datetime-local" step="0.001" required></div>
+      <div class="dialog-field"><label for="checkout-status">Estado del cobro</label><select id="checkout-status" required><option value="paid">Pagó</option><option value="unpaid">No pagó (registrar adeudo)</option></select></div>
+      <div class="dialog-field" id="payment-method-field"><label for="payment-method">Método de pago</label><select id="payment-method" required><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Transferencia">Transferencia</option></select></div>
+      <div class="dialog-actions"><button class="secondary" id="cancel-checkout" type="button">Cancelar</button><button class="primary" type="submit">Confirmar salida</button></div>
+    </form>
+  </dialog>
+  <dialog id="cancel-entry-dialog" aria-labelledby="cancel-entry-title">
+    <form class="dialog-content" id="cancel-entry-form">
+      <h2 id="cancel-entry-title">Anular entrada</h2>
+      <p id="cancel-entry-driver"></p>
+      <div class="dialog-field"><label for="cancellation-reason">Motivo de anulación *</label><input id="cancellation-reason" maxlength="160" required placeholder="Ej. Registro accidental"></div>
+      <div class="dialog-actions"><button class="secondary" id="dismiss-cancellation" type="button">Volver</button><button class="primary" type="submit">Anular entrada</button></div>
+    </form>
+  </dialog>
+  <dialog id="debt-dialog" aria-labelledby="debt-title">
+    <form class="dialog-content" id="debt-form">
+      <h2 id="debt-title">Registrar cobro de adeudo</h2>
+      <p id="debt-driver"></p>
+      <div class="charge-box"><span>Adeudo</span><strong id="debt-amount"></strong></div>
+      <div class="dialog-field"><label for="debt-payment-method">Método de pago</label><select id="debt-payment-method" required><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Transferencia">Transferencia</option></select></div>
+      <div class="dialog-actions"><button class="secondary" id="dismiss-debt" type="button">Cancelar</button><button class="primary" type="submit">Confirmar cobro</button></div>
+    </form>
+  </dialog>
+  <div class="toast storage-error" id="storage-error" role="alert" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "dxparking.v2";
+    const RATE_QUICK_LIMIT_MS = 15 * 60 * 1000;
+    const RATE_FIRST_LIMIT_MS = 60 * 60 * 1000;
+    const RATE_SECOND_LIMIT_MS = 120 * 60 * 1000;
+    let checkoutVehicleId = null;
+    let cancellationVehicleId = null;
+    let debtId = null;
+    let toastTimer;
+    let stateLoadError = false;
+    let stateStorageError = false;
+    const state = loadState();
+
+    function loadState() {
+      try {
+        const current = localStorage.getItem(STORAGE_KEY);
+        const legacy = current === null ? localStorage.getItem("dxparking.v1") : null;
+        const saved = JSON.parse(current || legacy || "{}") || {};
+        const loaded = {
+          active: Array.isArray(saved.active) ? saved.active : [],
+          payments: Array.isArray(saved.payments) ? saved.payments : [],
+          cuts: Array.isArray(saved.cuts) ? saved.cuts : [],
+          debts: Array.isArray(saved.debts) ? saved.debts : [],
+          cancellations: Array.isArray(saved.cancellations) ? saved.cancellations : [],
+          lastAutomaticCutDate: validLocalDateKey(saved.lastAutomaticCutDate) ? saved.lastAutomaticCutDate : null
+        };
+        if (current === null && legacy !== null) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+          localStorage.removeItem("dxparking.v1");
+          notify("Datos anteriores recuperados y migrados.");
+        }
+        return loaded;
+      } catch (error) {
+        stateLoadError = true;
+        const warning = document.querySelector("#storage-error");
+        warning.textContent = "No se pudieron leer o migrar los datos guardados. No se guardarán cambios para evitar sobrescribirlos.";
+        warning.hidden = false;
+        console.error("No se pudo cargar el estado de DxParking.", error);
+        return { active: [], payments: [], cuts: [], debts: [], cancellations: [], lastAutomaticCutDate: null };
+      }
+    }
+
+    function persist() {
+      if (stateLoadError || stateStorageError) {
+        notify(stateLoadError
+          ? "No se guardaron cambios porque los datos existentes no se pudieron cargar."
+          : "No se guardaron cambios porque el almacenamiento está bloqueado.");
+        return false;
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        return true;
+      } catch (error) {
+        stateStorageError = true;
+        const warning = document.querySelector("#storage-error");
+        warning.textContent = "No se pudieron guardar los datos. Los cambios se bloquearon para evitar inconsistencias.";
+        warning.hidden = false;
+        notify("No se pudieron guardar los cambios. Revisa el espacio disponible del navegador.");
+        console.error("No se pudo guardar el estado de DxParking.", error);
+        return false;
+      }
+    }
+
+    function newId() {
+      return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function validLocalDateKey(value) {
+      if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const [year, month, day] = value.split("-").map(Number);
+      return localDateKey(new Date(year, month - 1, day)) === value;
+    }
+
+    function localDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function nextLocalDate(dateKey) {
+      const [year, month, day] = dateKey.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      date.setDate(date.getDate() + 1);
+      return date;
+    }
+
+    function localDateTimeValue(date = new Date(), includeMilliseconds = false) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, includeMilliseconds ? 23 : 19);
+    }
+
+    function dateFromInput(value) {
+      return new Date(value);
+    }
+
+    function formatDate(value, options = {}) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "—";
+      return new Intl.DateTimeFormat("es-MX", { dateStyle: "short", timeStyle: "short", ...options }).format(date);
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
+    }
+
+    function elapsedMinutes(start, end = new Date()) {
+      return Math.max(0, Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / 60000));
+    }
+
+    function formatDuration(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (hours === 0) return `${remainingMinutes} min`;
+      return remainingMinutes ? `${hours} h ${remainingMinutes} min` : `${hours} h`;
+    }
+
+    function chargeFor(start, end) {
+      const duration = Math.max(0, new Date(end).getTime() - new Date(start).getTime());
+      if (duration <= RATE_QUICK_LIMIT_MS) return 10;
+      if (duration <= RATE_FIRST_LIMIT_MS) return 20;
+      if (duration <= RATE_SECOND_LIMIT_MS) return 40;
+      return 50;
+    }
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character]);
+    }
+
+    function notify(message) {
+      const toast = document.querySelector("#toast");
+      toast.textContent = message;
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 3400);
+    }
+
+    function openPeriodPayments() {
+      return state.payments.filter(payment => !payment.cutId);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      processAutomaticCuts(now);
+      document.querySelector("#live-time").textContent = new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
+      document.querySelector("#live-date").textContent = new Intl.DateTimeFormat("es-MX", { dateStyle: "full" }).format(now);
+      document.querySelector("#entry-time").value = localDateTimeValue(now);
+      const latestCut = [...state.cuts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      document.querySelector("#period-label").textContent = latestCut
+        ? `Periodo abierto desde ${formatDate(latestCut.createdAt, { dateStyle: "short", timeStyle: "short" })}`
+        : "Periodo abierto · desde el primer registro";
+      if (document.querySelector("#view-operation").hidden === false) renderActive();
+    }
+
+    function renderSummary() {
+      const openPayments = openPeriodPayments();
+      const outstandingDebts = state.debts.filter(debt => !debt.settledAt);
+      document.querySelector("#active-count").textContent = state.active.length;
+      document.querySelector("#open-total").textContent = money(openPayments.reduce((sum, payment) => sum + payment.amount, 0));
+      document.querySelector("#open-count").textContent = openPayments.length;
+      document.querySelector("#open-debt-total").textContent = money(outstandingDebts.reduce((sum, debt) => sum + debt.amount, 0));
+      const cash = openPayments.filter(payment => payment.paymentMethod === "Efectivo").reduce((sum, payment) => sum + payment.amount, 0);
+      const other = openPayments.filter(payment => payment.paymentMethod !== "Efectivo").reduce((sum, payment) => sum + payment.amount, 0);
+      document.querySelector("#cut-total").textContent = money(openPayments.reduce((sum, payment) => sum + payment.amount, 0));
+      document.querySelector("#cut-count").textContent = openPayments.length;
+      document.querySelector("#cut-cash").textContent = money(cash);
+      document.querySelector("#cut-other").textContent = money(other);
+      document.querySelector("#make-cut").disabled = openPayments.length === 0;
+    }
+
+    function renderActive() {
+      const query = document.querySelector("#active-search").value.trim().toLocaleLowerCase("es-MX");
+      const vehicles = state.active.filter(vehicle => `${vehicle.driver} ${vehicle.plate}`.toLocaleLowerCase("es-MX").includes(query));
+      document.querySelector("#active-caption").textContent = `${state.active.length} ${state.active.length === 1 ? "vehículo registrado" : "vehículos registrados"}`;
+      document.querySelector("#active-empty").hidden = vehicles.length > 0;
+      document.querySelector("#active-rows").innerHTML = vehicles.map(vehicle => `
+        <tr>
+          <td><div class="row-actions"><button class="primary checkout-button" type="button" data-id="${escapeHtml(vehicle.id)}" aria-label="Registrar salida de ${escapeHtml(vehicle.driver)}">Registrar salida</button><button class="quiet-button danger-button cancel-entry-button" type="button" data-id="${escapeHtml(vehicle.id)}" aria-label="Anular entrada de ${escapeHtml(vehicle.driver)}">Anular</button></div></td>
+          <td><strong>${escapeHtml(vehicle.driver)}</strong></td>
+          <td>${vehicle.plate ? `<span class="plate">${escapeHtml(vehicle.plate)}</span>` : "—"}</td>
+          <td><span class="color-dot" style="background:${safeColor(vehicle.color)}"></span>${escapeHtml(vehicle.color)}</td>
+          <td>${formatDate(vehicle.entryTime)}</td>
+          <td class="elapsed">${formatDuration(elapsedMinutes(vehicle.entryTime))}</td>
+        </tr>`).join("");
+    }
+
+    function safeColor(value) {
+      const namedColors = { blanco: "#ffffff", negro: "#202522", rojo: "#c84b42", azul: "#477ba7", gris: "#89918e", plata: "#c5cbc8", verde: "#4d8c5c", amarillo: "#e4c54b", naranja: "#df8547", cafe: "#805d48", marron: "#805d48" };
+      return namedColors[String(value).toLocaleLowerCase("es-MX").trim()] || "#a4b1a9";
+    }
+
+    function renderPayments() {
+      const query = document.querySelector("#payment-search").value.trim().toLocaleLowerCase("es-MX");
+      const payments = [...state.payments].reverse().filter(payment => `${payment.driver} ${payment.plate}`.toLocaleLowerCase("es-MX").includes(query));
+      document.querySelector("#payment-empty").hidden = payments.length > 0;
+      document.querySelector("#payment-rows").innerHTML = payments.map(payment => `
+        <tr>
+          <td><strong>${escapeHtml(payment.driver)}</strong></td><td>${payment.plate ? `<span class="plate">${escapeHtml(payment.plate)}</span>` : "—"}</td>
+          <td>${formatDate(payment.entryTime)}</td><td>${formatDate(payment.exitTime)}</td>
+          <td>${formatDuration(payment.durationMinutes)}</td><td><strong>${money(payment.amount)}</strong></td><td>${formatDate(payment.paidAt)}</td>
+          <td class="method">${escapeHtml(payment.paymentMethod)}</td><td>${payment.cutId ? "Incluido" : "Pendiente"}</td>
+        </tr>`).join("");
+      renderDebts(query);
+      renderCancellations();
+    }
+
+    function renderDebts(query = "") {
+      const debts = [...state.debts].filter(debt => !debt.settledAt && `${debt.driver} ${debt.plate}`.toLocaleLowerCase("es-MX").includes(query)).reverse();
+      document.querySelector("#debt-empty").hidden = debts.length > 0;
+      document.querySelector("#debt-rows").innerHTML = debts.map(debt => `
+        <tr>
+          <td><strong>${escapeHtml(debt.driver)}</strong></td><td>${debt.plate ? `<span class="plate">${escapeHtml(debt.plate)}</span>` : "—"}</td>
+          <td>${formatDate(debt.exitTime)}</td><td>${formatDuration(debt.durationMinutes)}</td><td><strong>${money(debt.amount)}</strong></td>
+          <td><button class="quiet-button collect-debt-button" type="button" data-id="${escapeHtml(debt.id)}">Registrar cobro</button></td>
+        </tr>`).join("");
+    }
+
+    function renderCancellations() {
+      const cancellations = [...state.cancellations].reverse();
+      document.querySelector("#cancellation-empty").hidden = cancellations.length > 0;
+      document.querySelector("#cancellation-rows").innerHTML = cancellations.map(item => `
+        <tr><td><strong>${escapeHtml(item.driver)}</strong></td><td>${item.plate ? `<span class="plate">${escapeHtml(item.plate)}</span>` : "—"}</td>
+          <td>${formatDate(item.entryTime)}</td><td>${formatDate(item.canceledAt)}</td><td>${escapeHtml(item.reason)}</td></tr>`).join("");
+    }
+
+    function renderCuts() {
+      const cuts = [...state.cuts].reverse();
+      document.querySelector("#cut-empty").hidden = cuts.length > 0;
+      document.querySelector("#cut-rows").innerHTML = cuts.map(cut => {
+        const methods = Object.entries(cut.methods || {}).map(([method, total]) => `${escapeHtml(method)} ${money(total)}`).join(" · ");
+        return `<tr><td><strong>${formatDate(cut.createdAt)}</strong><br><span class="method">${cut.automatic ? "Automático" : "Manual"}</span></td><td>${formatDate(cut.from)} a ${formatDate(cut.createdAt)}</td><td>${cut.paymentCount}</td><td><strong>${money(cut.total)}</strong></td><td class="method">${methods || "—"}</td><td><button class="quiet-button download-cut" type="button" data-id="${escapeHtml(cut.id)}">Descargar CSV</button></td></tr>`;
+      }).join("");
+    }
+
+    function render() {
+      renderSummary();
+      renderActive();
+      renderPayments();
+      renderCuts();
+    }
+
+    function switchView(name) {
+      document.querySelectorAll(".nav button").forEach(button => {
+        if (button.dataset.view === name) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      document.querySelectorAll(".view").forEach(view => { view.hidden = view.id !== `view-${name}`; });
+    }
+
+    function startCheckout(vehicle) {
+      checkoutVehicleId = vehicle.id;
+      const now = new Date();
+      document.querySelector("#checkout-driver").textContent = `${vehicle.driver}${vehicle.plate ? ` · ${vehicle.plate}` : ""}`;
+      document.querySelector("#exit-time").value = localDateTimeValue(now, true);
+      document.querySelector("#checkout-status").value = "paid";
+      updateCheckoutStatus();
+      updateCheckoutQuote();
+      document.querySelector("#checkout-dialog").showModal();
+    }
+
+    function startCancellation(vehicle) {
+      cancellationVehicleId = vehicle.id;
+      document.querySelector("#cancel-entry-driver").textContent = `${vehicle.driver}${vehicle.plate ? ` · ${vehicle.plate}` : ""}`;
+      document.querySelector("#cancellation-reason").value = "";
+      document.querySelector("#cancel-entry-dialog").showModal();
+    }
+
+    function startDebtCollection(debt) {
+      debtId = debt.id;
+      document.querySelector("#debt-driver").textContent = `${debt.driver}${debt.plate ? ` · ${debt.plate}` : ""}`;
+      document.querySelector("#debt-amount").textContent = money(debt.amount);
+      document.querySelector("#debt-dialog").showModal();
+    }
+
+    function updateCheckoutQuote() {
+      const vehicle = state.active.find(item => item.id === checkoutVehicleId);
+      if (!vehicle) return;
+      const exit = dateFromInput(document.querySelector("#exit-time").value);
+      if (Number.isNaN(exit.getTime())) {
+        document.querySelector("#charge-duration").textContent = "Selecciona una hora de salida válida";
+        document.querySelector("#charge-amount").textContent = "—";
+        return;
+      }
+      const minutes = elapsedMinutes(vehicle.entryTime, exit);
+      document.querySelector("#charge-duration").textContent = `Tiempo estacionado: ${formatDuration(minutes)}`;
+      document.querySelector("#charge-amount").textContent = money(chargeFor(vehicle.entryTime, exit));
+    }
+
+    function updateCheckoutStatus() {
+      const unpaid = document.querySelector("#checkout-status").value === "unpaid";
+      const field = document.querySelector("#payment-method-field");
+      const method = document.querySelector("#payment-method");
+      field.hidden = unpaid;
+      method.disabled = unpaid;
+      method.required = !unpaid;
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function downloadCut(cut) {
+      const rows = [
+        ["DxParking - Corte de caja"],
+        ["Fecha del corte", formatDate(cut.createdAt)],
+        ["Tipo de corte", cut.automatic ? "Automático" : "Manual"],
+        ["Inicio del periodo", formatDate(cut.from)],
+        ["Pagos", cut.paymentCount],
+        ["Total", cut.total],
+        ["Efectivo", cut.methods?.Efectivo || 0],
+        ["Tarjeta", cut.methods?.Tarjeta || 0],
+        ["Transferencia", cut.methods?.Transferencia || 0],
+        [],
+        ["Conductor", "Placas", "Color", "Entrada", "Salida", "Tiempo (min)", "Importe", "Método de pago"]
+      ];
+      cut.payments.forEach(payment => rows.push([
+        payment.driver, payment.plate, payment.color, formatDate(payment.entryTime), formatDate(payment.exitTime),
+        payment.durationMinutes, payment.amount, payment.paymentMethod
+      ]));
+      const contents = "\uFEFF" + rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+      const blob = new Blob([contents], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `DxParking-corte-${localDateKey(new Date(cut.createdAt))}-${cut.id.slice(-5)}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function createCut(cutAt, { download = false, automaticDate = null } = {}) {
+      const payments = openPeriodPayments().filter(payment => new Date(payment.paidAt) <= cutAt);
+      const previousAutomaticDate = state.lastAutomaticCutDate;
+      if (payments.length === 0) {
+        if (automaticDate) {
+          state.lastAutomaticCutDate = automaticDate;
+          if (!persist()) {
+            state.lastAutomaticCutDate = previousAutomaticDate;
+            return false;
+          }
+        }
+        return null;
+      }
+      const previousCut = [...state.cuts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      const methods = { Efectivo: 0, Tarjeta: 0, Transferencia: 0 };
+      payments.forEach(payment => { methods[payment.paymentMethod] = (methods[payment.paymentMethod] || 0) + payment.amount; });
+      const cut = {
+        id: newId(),
+        automatic: Boolean(automaticDate),
+        from: previousCut ? previousCut.createdAt : payments.reduce((first, payment) => new Date(payment.paidAt) < new Date(first) ? payment.paidAt : first, payments[0].paidAt),
+        createdAt: cutAt.toISOString(),
+        paymentCount: payments.length,
+        total: payments.reduce((sum, payment) => sum + payment.amount, 0),
+        methods,
+        payments: payments.map(payment => ({ ...payment }))
+      };
+      payments.forEach(payment => { payment.cutId = cut.id; });
+      state.cuts.push(cut);
+      if (automaticDate) state.lastAutomaticCutDate = automaticDate;
+      if (!persist()) {
+        payments.forEach(payment => { payment.cutId = null; });
+        state.cuts.pop();
+        state.lastAutomaticCutDate = previousAutomaticDate;
+        return false;
+      }
+      if (download) downloadCut(cut);
+      return cut;
+    }
+
+    function processAutomaticCuts(now = new Date()) {
+      if (stateLoadError || stateStorageError) return;
+      const currentDate = localDateKey(now);
+      if (!state.lastAutomaticCutDate) {
+        const pendingPayments = openPeriodPayments().filter(payment => !Number.isNaN(new Date(payment.paidAt).getTime()));
+        state.lastAutomaticCutDate = pendingPayments.length
+          ? localDateKey(new Date(pendingPayments.reduce((first, payment) => new Date(payment.paidAt) < new Date(first) ? payment.paidAt : first, pendingPayments[0].paidAt)))
+          : currentDate;
+        if (!persist()) {
+          state.lastAutomaticCutDate = null;
+          return;
+        }
+      }
+      while (state.lastAutomaticCutDate < currentDate) {
+        const boundary = nextLocalDate(state.lastAutomaticCutDate);
+        const boundaryDate = localDateKey(boundary);
+        if (boundaryDate > currentDate) break;
+        const pendingPayments = openPeriodPayments().filter(payment => !Number.isNaN(new Date(payment.paidAt).getTime()));
+        const hasPaymentsForCut = pendingPayments.some(payment => new Date(payment.paidAt) <= boundary);
+        if (!hasPaymentsForCut) {
+          const previousDate = state.lastAutomaticCutDate;
+          if (pendingPayments.length === 0) state.lastAutomaticCutDate = currentDate;
+          else {
+            const earliestPaymentDate = pendingPayments.reduce((first, payment) => {
+              const paymentDate = localDateKey(new Date(payment.paidAt));
+              return paymentDate < first ? paymentDate : first;
+            }, localDateKey(new Date(pendingPayments[0].paidAt)));
+            if (earliestPaymentDate > boundaryDate) state.lastAutomaticCutDate = earliestPaymentDate < currentDate ? earliestPaymentDate : currentDate;
+            else state.lastAutomaticCutDate = boundaryDate;
+          }
+          if (!persist()) {
+            state.lastAutomaticCutDate = previousDate;
+            return;
+          }
+          continue;
+        }
+        const cut = createCut(boundary, { automaticDate: boundaryDate });
+        if (cut === false) return;
+        if (cut) {
+          render();
+          notify(`Corte automático guardado: ${money(cut.total)}.`);
+        }
+      }
+    }
+
+    document.querySelector("#entry-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const driver = String(form.get("driver")).trim();
+      const color = String(form.get("color")).trim();
+      if (!driver || !color) {
+        notify("Escribe el nombre del conductor y el color del vehículo.");
+        return;
+      }
+      const entry = new Date();
+      const vehicle = {
+        id: newId(),
+        driver,
+        plate: String(form.get("plate")).trim().toLocaleUpperCase("es-MX"),
+        color,
+        entryTime: new Date(Math.floor(entry.getTime() / 1000) * 1000).toISOString()
+      };
+      state.active.push(vehicle);
+      if (!persist()) {
+        state.active.pop();
+        return;
+      }
+      event.currentTarget.reset();
+      updateClock();
+      render();
+      notify("Entrada registrada.");
+    });
+
+    document.querySelector("#active-rows").addEventListener("click", event => {
+      const button = event.target.closest(".checkout-button, .cancel-entry-button");
+      if (!button) return;
+      const vehicle = state.active.find(item => item.id === button.dataset.id);
+      if (!vehicle) return;
+      if (button.classList.contains("cancel-entry-button")) startCancellation(vehicle);
+      else startCheckout(vehicle);
+    });
+
+    document.querySelector("#exit-time").addEventListener("input", updateCheckoutQuote);
+    document.querySelector("#checkout-status").addEventListener("change", updateCheckoutStatus);
+    document.querySelector("#cancel-checkout").addEventListener("click", () => {
+      document.querySelector("#checkout-dialog").close();
+      checkoutVehicleId = null;
+    });
+    document.querySelector("#checkout-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const vehicle = state.active.find(item => item.id === checkoutVehicleId);
+      if (!vehicle) return;
+      const exit = dateFromInput(document.querySelector("#exit-time").value);
+      if (Number.isNaN(exit.getTime()) || exit.getTime() < new Date(vehicle.entryTime).getTime() || exit.getTime() > Date.now()) {
+        notify("La salida debe ser posterior a la entrada y no puede estar en el futuro.");
+        return;
+      }
+      processAutomaticCuts();
+      const activeIndex = state.active.findIndex(item => item.id === checkoutVehicleId);
+      const now = new Date().toISOString();
+      const isUnpaid = document.querySelector("#checkout-status").value === "unpaid";
+      const record = {
+        ...vehicle,
+        id: newId(),
+        exitTime: exit.toISOString(),
+        durationMinutes: elapsedMinutes(vehicle.entryTime, exit),
+        amount: chargeFor(vehicle.entryTime, exit)
+      };
+      const payment = isUnpaid ? null : {
+        ...record,
+        paymentMethod: document.querySelector("#payment-method").value,
+        paidAt: now,
+        cutId: null
+      };
+      const debt = isUnpaid ? { ...record, recordedAt: now, settledAt: null, paymentMethod: null } : null;
+      state.active.splice(activeIndex, 1);
+      if (payment) state.payments.push(payment);
+      if (debt) state.debts.push(debt);
+      if (!persist()) {
+        if (payment) state.payments.pop();
+        if (debt) state.debts.pop();
+        state.active.splice(activeIndex, 0, vehicle);
+        return;
+      }
+      document.querySelector("#checkout-dialog").close();
+      checkoutVehicleId = null;
+      render();
+      notify(isUnpaid ? `Salida registrada con adeudo de ${money(debt.amount)}.` : `Pago registrado: ${money(payment.amount)}.`);
+    });
+
+    document.querySelector("#cancel-entry-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const index = state.active.findIndex(item => item.id === cancellationVehicleId);
+      const vehicle = state.active[index];
+      const reason = document.querySelector("#cancellation-reason").value.trim();
+      if (!vehicle || !reason) {
+        notify("Escribe el motivo de la anulación.");
+        return;
+      }
+      const cancellation = { ...vehicle, canceledAt: new Date().toISOString(), reason };
+      state.active.splice(index, 1);
+      state.cancellations.push(cancellation);
+      if (!persist()) {
+        state.cancellations.pop();
+        state.active.splice(index, 0, vehicle);
+        return;
+      }
+      document.querySelector("#cancel-entry-dialog").close();
+      cancellationVehicleId = null;
+      render();
+      notify("Entrada anulada y guardada en el historial.");
+    });
+
+    document.querySelector("#dismiss-cancellation").addEventListener("click", () => {
+      document.querySelector("#cancel-entry-dialog").close();
+      cancellationVehicleId = null;
+    });
+
+    document.querySelector("#debt-rows").addEventListener("click", event => {
+      const button = event.target.closest(".collect-debt-button");
+      if (!button) return;
+      const debt = state.debts.find(item => item.id === button.dataset.id && !item.settledAt);
+      if (debt) startDebtCollection(debt);
+    });
+
+    document.querySelector("#debt-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const debt = state.debts.find(item => item.id === debtId && !item.settledAt);
+      if (!debt) return;
+      processAutomaticCuts();
+      const now = new Date().toISOString();
+      const payment = {
+        id: newId(),
+        driver: debt.driver,
+        plate: debt.plate,
+        color: debt.color,
+        entryTime: debt.entryTime,
+        exitTime: debt.exitTime,
+        durationMinutes: debt.durationMinutes,
+        amount: debt.amount,
+        paymentMethod: document.querySelector("#debt-payment-method").value,
+        paidAt: now,
+        cutId: null
+      };
+      debt.settledAt = now;
+      debt.paymentMethod = payment.paymentMethod;
+      debt.paymentId = payment.id;
+      state.payments.push(payment);
+      if (!persist()) {
+        state.payments.pop();
+        delete debt.settledAt;
+        delete debt.paymentMethod;
+        delete debt.paymentId;
+        return;
+      }
+      document.querySelector("#debt-dialog").close();
+      debtId = null;
+      render();
+      notify(`Adeudo cobrado: ${money(payment.amount)}.`);
+    });
+
+    document.querySelector("#dismiss-debt").addEventListener("click", () => {
+      document.querySelector("#debt-dialog").close();
+      debtId = null;
+    });
+
+    document.querySelector("#make-cut").addEventListener("click", () => {
+      processAutomaticCuts();
+      const cut = createCut(new Date(), { download: true });
+      if (cut === false) return;
+      if (!cut) {
+        notify("No hay pagos pendientes de corte.");
+        return;
+      }
+      render();
+      notify(`Corte guardado: ${money(cut.total)}.`);
+    });
+
+    document.querySelector("#cut-rows").addEventListener("click", event => {
+      const button = event.target.closest(".download-cut");
+      if (!button) return;
+      const cut = state.cuts.find(item => item.id === button.dataset.id);
+      if (cut) downloadCut(cut);
+    });
+
+    document.querySelector("#active-search").addEventListener("input", renderActive);
+    document.querySelector("#payment-search").addEventListener("input", renderPayments);
+    document.querySelectorAll(".nav button").forEach(button => button.addEventListener("click", () => switchView(button.dataset.view)));
+
+    updateClock();
+    render();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
