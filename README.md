@@ -4,7 +4,7 @@ Sitio personal de Mario Duxdury: música en vivo y servicios de programación.
 
 ## Muestra inicial
 
-La página principal (`index.html`) es la primera muestra publicada. Incluye las secciones de música y programación, enlaces de contacto y códigos QR en `images/`.
+La página principal (`index.html`) es la primera muestra publicada. Incluye las secciones de música y programación con enlaces directos de contacto.
 
 ## Publicación con GitHub Pages
 
