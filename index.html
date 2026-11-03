@@ -179,7 +179,7 @@
     .projects-header h2 { margin: 14px 0 0; font-family: var(--serif); font-size: 46px; font-weight: 600; line-height: 1.08; }
     .projects-header h2 em { color: #2e6687; }
     .projects-header p { max-width: 570px; margin: 14px 0 0; color: #4f5559; font-size: 14px; line-height: 1.75; }
-    .project-grid { display: grid; max-width: 1120px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin: 0 auto; }
+    .project-grid { display: grid; max-width: 1200px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin: 0 auto; }
     .project-card { min-width: 0; padding: 18px; border: 1px solid rgba(23,22,19,.17); background: rgba(255,255,255,.52); }
     .project-tag { display: inline-block; padding: 6px 8px; background: var(--ink); color: #fff; font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
     .project-card h3 { margin: 16px 0 8px; font-family: var(--serif); font-size: 25px; font-weight: 600; }
@@ -211,8 +211,9 @@
     .closing .eyebrow { color: var(--lime); }
     .closing h2 { max-width: 700px; margin: 20px 0 25px; font-family: var(--serif); font-size: 50px; font-weight: 600; line-height: 1.08; }
     .closing h2 em { color: var(--orange); }
-    .contact-emails { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; margin: 0 0 24px; }
-    .contact-emails a { color: rgba(255,255,255,.82); font-size: 14px; overflow-wrap: anywhere; text-decoration-color: var(--orange); text-underline-offset: 4px; }
+    .contact-emails { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 0 0 24px; }
+    .contact-label { color: var(--lime); font-family: var(--mono); font-size: 11px; text-transform: uppercase; }
+    .contact-emails a { color: var(--lime); font-size: 14px; overflow-wrap: anywhere; text-decoration-color: var(--lime); text-underline-offset: 4px; }
     .contact-emails a:hover { color: var(--lime); }
     .closing .action { border-color: var(--lime); background: var(--lime); color: var(--ink); }
     .closing .action:hover { border-color: var(--orange); background: var(--orange); }
@@ -348,8 +349,7 @@
           <li>Herramientas a medida</li>
         </ul>
         <div class="web-offer">
-          <p>Haz realidad tu idea: <strong>$100 MXN por página, con dominio incluido.</strong></p>
-          <p>¿Quieres mantener tu sitio al día? El mantenimiento es opcional: <strong>$300 MXN por modificación.</strong> Para cambios frecuentes, cotizamos según la frecuencia que necesites.</p>
+          <p>Cada idea merece una solución única. Cuéntame qué necesitas y hagámosla realidad.</p>
         </div>
         <div class="feature-meta">
           <a class="feature-link" href="https://www.facebook.com/share/1EwVcoVdiJ/" target="_blank" rel="noopener noreferrer">
@@ -395,6 +395,7 @@
       <div class="eyebrow">¿Por dónde empezamos?</div>
       <h2 id="closing-title">Una canción para escuchar.<br><em>Una idea para construir.</em></h2>
       <div class="contact-emails" aria-label="Correos de contacto">
+        <div class="contact-label">Contacto</div>
         <a href="mailto:dux.capy.93@gmail.com">dux.capy.93@gmail.com</a>
         <a href="mailto:mario_mario93@hotmail.com">mario_mario93@hotmail.com</a>
       </div>
