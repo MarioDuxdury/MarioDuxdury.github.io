@@ -157,6 +157,11 @@
     .repertoire { margin: 22px 0 0; padding-left: 20px; color: #4f4b46; font-size: 14px; line-height: 1.7; }
     .repertoire a { color: #7d3828; text-underline-offset: 3px; }
     .repertoire a:hover { color: var(--ink); }
+    .reel-embed { width: min(100%, 360px); margin: 14px 0 0; }
+    .reel-embed iframe { display: block; width: 100%; aspect-ratio: 9 / 16; border: 0; background: #171613; }
+    .reel-embed figcaption { margin-top: 8px; color: #4f4b46; font-size: 12px; line-height: 1.6; }
+    .reel-embed a { color: #7d3828; text-underline-offset: 3px; }
+    .reel-embed a:hover { color: var(--ink); }
     .services { display: flex; flex-wrap: wrap; gap: 8px; max-width: 420px; margin: 0 0 28px; padding: 0; list-style: none; }
     .services li { padding: 8px 10px; border: 1px solid rgba(23,22,19,.23); font-size: 12px; }
     .web-offer { max-width: 420px; margin: -5px 0 25px; padding: 2px 0 2px 15px; border-left: 3px solid #2e6687; }
@@ -305,10 +310,17 @@
             <figcaption>QR música</figcaption>
           </figure>
         </div>
-        <div class="service-label repertoire-heading">Repertorio</div>
-        <ol class="repertoire">
-          <li><a href="https://www.facebook.com/share/v/19Vu3R44nJ/" target="_blank" rel="noopener noreferrer">Ver reel en Facebook</a></li>
-        </ol>
+        <div class="service-label repertoire-heading">Reel destacado</div>
+        <figure class="reel-embed">
+          <iframe
+            src="https://www.facebook.com/plugins/video.php?height=640&amp;href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1105706432463571%2F&amp;show_text=false&amp;width=360"
+            title="Reel de Mario Duxdury en Facebook"
+            loading="lazy"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+          <figcaption>Si el reproductor no carga, <a href="https://www.facebook.com/reel/1105706432463571/" target="_blank" rel="noopener noreferrer">abre el reel en Facebook</a>.</figcaption>
+        </figure>
       </div>
     </section>
 
